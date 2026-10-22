@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sam AI Voice Assistant</title>
+  <meta name="description" content="Siri/Jarvis-inspired voice assistant with Pure NumPy LSTM intent classification and Groq LLaMA chat fallback.">
+  <style>
+    :root {
+      --bg-dark: #070b14;
+      --bg-card: rgba(13, 21, 39, 0.7);
+      --bg-card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-cyan: #00f2fe;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --shadow-glow: 0 0 25px rgba(0, 242, 254, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(0, 242, 254, 0.08) 0%, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      width: 100%;
+      max-width: 840px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--bg-card-border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(7, 11, 20, 0.85);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      color: #070b14;
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-subtitle {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Container */
+    main {
+      width: 100%;
+      max-width: 840px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 20px 24px;
+      gap: 16px;
+    }
+
+    /* Warning Banner */
+    .banner {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fde68a;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.82rem;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Orb Section */
+    .orb-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 0 10px;
+      position: relative;
+    }
+
+    .orb {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+    }
+
+    .orb::before {
+      content: "";
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      transition: all 0.5s ease;
+      z-index: 1;
+    }
+
+    .orb-inner {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.5s ease;
+    }
+
+    /* Orb States */
+    .orb.state-idle {
+      background: radial-gradient(circle at 35% 35%, #00f2fe 0%, #0284c7 60%, #0369a1 100%);
+      box-shadow: 0 0 35px rgba(0, 242, 254, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.5);
+      animation: pulse-idle 4s ease-in-out infinite;
+    }
+    .orb.state-idle::before {
+      background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, transparent 70%);
+    }
+
+    .orb.state-listening {
+      background: radial-gradient(circle at 35% 35%, #34d399 0%, #10b981 60%, #047857 100%);
+      box-shadow: 0 0 50px rgba(16, 185, 129, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.6);
+      animation: pulse-listening 1.2s ease-in-out infinite alternate;
+    }
+    .orb.state-listening::before {
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+      animation: ripple 1.5s linear infinite;
+    }
+
+    .orb.state-thinking {
+      background: radial-gradient(circle at 35% 35%, #c084fc 0%, #8b5cf6 60%, #6d28d9 100%);
+      box-shadow: 0 0 50px rgba(139, 92, 246, 0.6), inset 0 0 25px rgba(255, 255, 255, 0.6);
+      animation: rotate-thinking 2s linear infinite;
+    }
+    .orb.state-thinking::before {
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+    }
+
+    .orb.state-speaking {
+      background: radial-gradient(circle at 35% 35%, #fbbf24 0%, #f59e0b 60%, #b45309 100%);
+      box-shadow: 0 0 55px rgba(245, 158, 11, 0.65), inset 0 0 20px rgba(255, 255, 255, 0.6);
+      animation: pulse-speaking 0.8s ease-in-out infinite alternate;
+    }
+    .orb.state-speaking::before {
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, transparent 70%);
+      animation: ripple 1.2s linear infinite;
+    }
+
+    @keyframes pulse-idle {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.04); filter: brightness(1.15); }
+    }
+    @keyframes pulse-listening {
+      0% { transform: scale(0.98); }
+      100% { transform: scale(1.1); filter: brightness(1.25); }
+    }
+    @keyframes rotate-thinking {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.06); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+    @keyframes pulse-speaking {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.12); filter: brightness(1.3); }
+    }
+    @keyframes ripple {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    .orb-status {
+      margin-top: 14px;
+      font-size: 0.86rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+    }
+
+    /* Chat Messages Window */
+    .chat-window {
+      flex: 1;
+      min-height: 280px;
+      max-height: 480px;
+      overflow-y: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      backdrop-filter: blur(16px);
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .chat-window::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-window::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat-window::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+    }
+
+    .empty-state {
+      margin: auto;
+      text-align: center;
+      color: var(--text-muted);
+      max-width: 380px;
+    }
+
+    .empty-state h3 {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .empty-state p {
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    /* Message Bubbles */
+    .msg-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 85%;
+    }
+
+    .msg-row.user {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .msg-row.assistant {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+
+    .msg-bubble {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 0.92rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .msg-row.user .msg-bubble {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+    }
+
+    .msg-row.assistant .msg-bubble {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Badges & Meta */
+    .msg-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    .intent-badge {
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      font-size: 0.65rem;
+      letter-spacing: 0.4px;
+    }
+
+    .intent-time { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .intent-open_site { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+    .intent-search { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+    .intent-chat { background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3); }
+
+    .confidence-pill {
+      font-family: monospace;
+      color: var(--text-muted);
+    }
+
+    /* Feedback Buttons */
+    .feedback-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 4px;
+    }
+
+    .feedback-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      transition: color 0.15s ease;
+    }
+
+    .feedback-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .feedback-btn.active {
+      color: var(--accent-cyan);
+    }
+
+    /* Suggestion Chips */
+    .chips-wrapper {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .chips-wrapper::-webkit-scrollbar { display: none; }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-muted);
+      padding: 7px 13px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chip:hover {
+      background: rgba(255, 255, 255, 0.09);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    /* Composer Section */
+    .composer {
+      display: flex;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 6px 8px 6px 14px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      align-items: center;
+    }
+
+    .composer input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      padding: 8px 0;
+    }
+
+    .composer input::placeholder {
+      color: #64748b;
+    }
+
+    .mic-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mic-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .mic-btn.active {
+      background: var(--accent-green);
+      color: #070b14;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+    }
+
+    .send-btn {
+      padding: 0 16px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-cyan), #0284c7);
+      border: none;
+      color: #070b14;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .send-btn:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 14px rgba(0, 242, 254, 0.4);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #0d1527;
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      max-width: 440px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .modal-title { font-size: 1.15rem; font-weight: 700; }
+    .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
+
+    .modal-body { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
+    .modal-body p { margin-bottom: 12px; }
+
+    .modal-footer { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
+
+    /* Footer Note */
+    footer {
+      width: 100%;
+      max-width: 840px;
+      padding: 8px 20px 14px;
+      text-align: center;
+      font-size: 0.72rem;
+      color: #64748b;
+    }
+
+    @media (max-width: 600px) {
+      .chat-window { min-height: 220px; max-height: 380px; }
+      .orb { width: 95px; height: 95px; }
+      .header-actions span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">S</div>
+      <div>
+        <div class="brand-title">Sam AI</div>
+        <div class="brand-subtitle">Voice Assistant</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="clearBtn" title="Clear conversation history">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        <span>Clear</span>
+      </button>
+      <button class="icon-btn" id="downloadBtn" title="Download text transcript">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>Transcript</span>
+      </button>
+      <button class="icon-btn" id="privacyBtn" title="Privacy and settings">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <span>Privacy</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Web Speech Unsupported Notice -->
+    <div class="banner" id="unsupportedBanner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      <div>Voice recognition is not supported in this browser. Please use <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong> for speech features. You can still chat by typing below.</div>
+    </div>
+
+    <!-- Glowing Interactive Orb -->
+    <div class="orb-container">
+      <div class="orb state-idle" id="samOrb" title="Tap to wake Sam / Start listening" role="button" tabindex="0" aria-label="Sam Voice Assistant Orb">
+        <div class="orb-inner">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </div>
+      </div>
+      <div class="orb-status" id="orbStatus">
+        <span class="status-dot"></span>
+        <span id="statusText">Tap orb or say "Hey Sam"</span>
+      </div>
+    </div>
+
+    <!-- Chat Messages Window -->
+    <div class="chat-window" id="chatWindow" role="log" aria-live="polite">
+      <div class="empty-state" id="emptyState">
+        <h3>Meet Sam, your voice AI assistant</h3>
+        <p>Ask for the local time, open websites, search Google, or tap the microphone to start talking.</p>
+      </div>
+    </div>
+
+    <!-- Suggestion Chips -->
+    <div class="chips-wrapper" id="chipsWrapper">
+      <button class="chip" data-prompt="What time is it right now?">🕒 What's the time?</button>
+      <button class="chip" data-prompt="Open YouTube">📺 Open YouTube</button>
+      <button class="chip" data-prompt="Open GitHub">🐙 Open GitHub</button>
+      <button class="chip" data-prompt="Search for quantum computing">🔍 Search quantum computing</button>
+      <button class="chip" data-prompt="Tell me an interesting science joke">😄 Tell me a joke</button>
+      <button class="chip" data-prompt="Explain neural networks in simple words">🧠 Explain neural networks</button>
+    </div>
+
+    <!-- Input Composer -->
+    <div class="composer">
+      <button class="mic-btn" id="micBtn" title="Toggle voice listening" aria-label="Toggle voice listening">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+      </button>
+      <input type="text" id="userInput" placeholder="Type a message or say 'Hey Sam'..." maxlength="300" autocomplete="off">
+      <button class="send-btn" id="sendBtn" aria-label="Send message">
+        <span>Send</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </div>
+  </main>
+
+  <!-- Privacy & Settings Modal -->
+  <div class="modal-backdrop" id="privacyModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Privacy & Voice Settings</h3>
+        <button class="modal-close" id="closePrivacyBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Client-Side Speech:</strong> Microphone audio is processed entirely within your browser using the standard Web Speech API. Audio is never transmitted to the server.</p>
+        <p><strong>Intent Classification:</strong> Only text transcripts are sent to the local lightweight inference engine.</p>
+
+        <!-- Voice Speech Rate Slider -->
+        <div style="margin: 16px 0; padding: 12px; background: rgba(255,255,255,0.04); border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 500; color: var(--text-main);">Voice Speech Rate</span>
+            <span id="speechRateLabel" style="font-family: monospace; color: var(--accent-cyan); font-weight: 600;">1.0x (Normal)</span>
+          </div>
+          <input type="range" id="speechRateSlider" min="0.5" max="2.0" step="0.1" value="1.0" style="width: 100%; accent-color: var(--accent-cyan); cursor: pointer;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
+            <span>0.5x (Slow)</span>
+            <span id="resetSpeechRate" style="cursor: pointer; text-decoration: underline; color: var(--text-muted);">Reset (1.0x)</span>
+            <span>2.0x (Fast)</span>
+          </div>
+        </div>
+
+        <div style="margin: 16px 0; padding: 12px; background: rgba(255,255,255,0.04); border-radius: 8px;">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--text-main);">
+            <input type="checkbox" id="consentToggle">
+            <span>Help improve Sam (anonymous intent feedback)</span>
+          </label>
+        </div>
+        <p style="font-size: 0.78rem;">When enabled, thumbs-up/down ratings and predicted intents are stored anonymously to help retrain model weights. Disabled by default.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="icon-btn" id="savePrivacyBtn" style="background: var(--accent-cyan); color: #070b14; font-weight: 600;">Save & Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Sam AI Voice Assistant • Offline Pure-NumPy LSTM Intent Classification • College Capstone Project
+  </footer>
+
+  <!-- JavaScript Logic -->
+  <script>
+    (function() {
+      // ---------------------------------------------------------
+      // 1. Application State & DOM
+      // ---------------------------------------------------------
+      const STORAGE_KEY = "sam_ai_conversation_history";
+      const CONSENT_KEY = "sam_opt_in_feedback";
+      const SPEECH_RATE_KEY = "sam_speech_rate";
+      const SESSION_ID = "sess-" + Math.random().toString(36).substring(2, 10);
+
+      let isListening = false;
+      let isSpeaking = false;
+      let currentSpeechRate = 1.0;
+      let cachedVoices = [];
+      let conversationHistory = [];
+      let speechSynth = window.speechSynthesis;
+      let recognition = null;
+
+      // DOM Elements
+      const orb = document.getElementById("samOrb");
+      const statusText = document.getElementById("statusText");
+      const chatWindow = document.getElementById("chatWindow");
+      const emptyState = document.getElementById("emptyState");
+      const userInput = document.getElementById("userInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const micBtn = document.getElementById("micBtn");
+      const clearBtn = document.getElementById("clearBtn");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const privacyBtn = document.getElementById("privacyBtn");
+      const privacyModal = document.getElementById("privacyModal");
+      const closePrivacyBtn = document.getElementById("closePrivacyBtn");
+      const savePrivacyBtn = document.getElementById("savePrivacyBtn");
+      const consentToggle = document.getElementById("consentToggle");
+      const speechRateSlider = document.getElementById("speechRateSlider");
+      const speechRateLabel = document.getElementById("speechRateLabel");
+      const resetSpeechRate = document.getElementById("resetSpeechRate");
+      const unsupportedBanner = document.getElementById("unsupportedBanner");
+      const chipsWrapper = document.getElementById("chipsWrapper");
+
+      // ---------------------------------------------------------
+      // 2. Load Local Persistence & Voice Cache
+      // ---------------------------------------------------------
+      try {
+        const savedHistory = localStorage.getItem(STORAGE_KEY);
+        if (savedHistory) {
+          conversationHistory = JSON.parse(savedHistory);
+          renderAllMessages();
+        }
+        consentToggle.checked = localStorage.getItem(CONSENT_KEY) === "true";
+
+        const savedRate = localStorage.getItem(SPEECH_RATE_KEY);
+        if (savedRate) {
+          const parsed = parseFloat(savedRate);
+          if (!isNaN(parsed) && parsed >= 0.5 && parsed <= 2.0) {
+            currentSpeechRate = parsed;
+            if (speechRateSlider) speechRateSlider.value = currentSpeechRate.toString();
+            updateRateLabel(currentSpeechRate);
+          }
+        }
+      } catch (e) {
+        console.warn("Storage loading failed:", e);
+      }
+
+      function updateRateLabel(val) {
+        if (!speechRateLabel) return;
+        const tag = val === 1.0 ? "(Normal)" : val < 1.0 ? "(Slower)" : "(Faster)";
+        speechRateLabel.textContent = val.toFixed(1) + "x " + tag;
+      }
+
+      if (speechRateSlider) {
+        speechRateSlider.addEventListener("input", (e) => {
+          const val = parseFloat(e.target.value);
+          currentSpeechRate = val;
+          updateRateLabel(val);
+          try {
+            localStorage.setItem(SPEECH_RATE_KEY, val.toString());
+          } catch(err) {}
+        });
+      }
+
+      if (resetSpeechRate) {
+        resetSpeechRate.addEventListener("click", () => {
+          currentSpeechRate = 1.0;
+          if (speechRateSlider) speechRateSlider.value = "1.0";
+          updateRateLabel(1.0);
+          try {
+            localStorage.setItem(SPEECH_RATE_KEY, "1.0");
+          } catch(err) {}
+        });
+      }
+
+      function updateVoicesList() {
+        if (speechSynth) {
+          cachedVoices = speechSynth.getVoices() || [];
+        }
+      }
+      updateVoicesList();
+      if (speechSynth && speechSynth.onvoiceschanged !== undefined) {
+        speechSynth.onvoiceschanged = updateVoicesList;
+      }
+
+      function saveHistory() {
+        try {
+          const bounded = conversationHistory.slice(-20);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(bounded));
+        } catch (e) {
+          console.warn("Storage write failed:", e);
+        }
+      }
+
+      // ---------------------------------------------------------
+      // 3. Orb State Management
+      // ---------------------------------------------------------
+      function setOrbState(state, label) {
+        orb.className = "orb state-" + state;
+        statusText.textContent = label;
+
+        if (state === "listening") {
+          micBtn.classList.add("active");
+        } else {
+          micBtn.classList.remove("active");
+        }
+      }
+
+      // ---------------------------------------------------------
+      // 4. Web Speech API (Recognition & Synthesis)
+      // ---------------------------------------------------------
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        unsupportedBanner.style.display = "flex";
+      } else {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-IN";
+
+        recognition.onstart = () => {
+          isListening = true;
+          setOrbState("listening", "Listening... (Say 'Hey Sam')");
+        };
+
+        recognition.onresult = (event) => {
+          let interimStr = "";
+          let finalStr = "";
+
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            const item = event.results[i];
+            if (item.isFinal) {
+              finalStr += item[0].transcript;
+            } else {
+              interimStr += item[0].transcript;
+            }
+          }
+
+          const currentSpeech = (finalStr || interimStr).trim();
+
+          // USER BARGE-IN INTERRUPTION: If user speaks while Sam is speaking, cancel immediately
+          if (isSpeaking && currentSpeech.length > 1) {
+            console.log("User barge-in detected. Halting speech synthesis.");
+            speechSynth.cancel();
+            isSpeaking = false;
+            setOrbState("interrupted", "Interrupted — Listening to you...");
+            setTimeout(() => {
+              if (isListening) {
+                setOrbState("listening", "Listening...");
+              }
+            }, 300);
+          }
+
+          if (finalStr.trim()) {
+            const cleanFinal = finalStr.trim();
+            console.log("Final spoken turn heard:", cleanFinal);
+
+            // Wake word scanner ("Hey Sam" / "Hello Sam" / "Sam")
+            const wakeMatch = cleanFinal.match(/\b(hey\s+sam|hello\s+sam|sam)\b/i);
+            if (wakeMatch) {
+              const afterWake = cleanFinal.substring(wakeMatch.index + wakeMatch[0].length).trim();
+              const cleanQuery = afterWake.replace(/^[,\.\?!]\s*/, "");
+
+              if (!cleanQuery) {
+                speakText("Yes, I'm listening! How can I help you?");
+              } else {
+                handleSend(cleanQuery);
+              }
+            } else {
+              handleSend(cleanFinal);
+            }
+          }
+        };
+
+        recognition.onerror = (event) => {
+          console.warn("Speech recognition error:", event.error);
+          if (event.error === "not-allowed") {
+            setOrbState("error", "Microphone access denied.");
+            isListening = false;
+          } else if (event.error !== "no-speech") {
+            setOrbState("idle", "Tap orb or say 'Hey Sam'");
+            isListening = false;
+          }
+        };
+
+        recognition.onend = () => {
+          if (isListening && !isSpeaking) {
+            try {
+              recognition.start();
+            } catch (e) {}
+          } else if (!isSpeaking) {
+            setOrbState("idle", "Tap orb or say 'Hey Sam'");
+            isListening = false;
+          }
+        };
+      }
+
+      function toggleListening() {
+        if (!recognition) {
+          alert("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
+          return;
+        }
+
+        if (isListening) {
+          isListening = false;
+          try { recognition.stop(); } catch(e) {}
+          setOrbState("idle", "Tap orb or say 'Hey Sam'");
+        } else {
+          try {
+            recognition.start();
+          } catch (e) {
+            isListening = true;
+          }
+        }
+      }
+
+      // Safe speech synthesis with audio collision prevention and customizable speed
+      function speakText(text, onComplete) {
+        if (!speechSynth) {
+          if (onComplete) onComplete();
+          return;
+        }
+
+        // Halt listening before Sam begins speaking
+        isSpeaking = true;
+        if (recognition) {
+          try { recognition.abort(); } catch (e) {}
+        }
+
+        speechSynth.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = currentSpeechRate;
+        utterance.pitch = 1.0;
+        utterance.lang = "en-IN";
+
+        const voices = cachedVoices.length > 0 ? cachedVoices : speechSynth.getVoices();
+        const preferredVoice = voices.find(v => v.lang === "en-IN") ||
+                               voices.find(v => v.lang.startsWith("en-") && v.name.includes("Natural")) ||
+                               voices.find(v => v.lang.startsWith("en"));
+        if (preferredVoice) utterance.voice = preferredVoice;
+
+        setOrbState("speaking", "Speaking...");
+
+        utterance.onend = () => {
+          isSpeaking = false;
+          if (isListening && recognition) {
+            try {
+              recognition.start();
+              setOrbState("listening", "Listening... (Say 'Hey Sam')");
+            } catch (e) {
+              setOrbState("idle", "Tap orb or say 'Hey Sam'");
+            }
+          } else {
+            setOrbState("idle", "Tap orb or say 'Hey Sam'");
+          }
+          if (onComplete) onComplete();
+        };
+
+        utterance.onerror = (e) => {
+          console.warn("Speech synthesis error:", e);
+          isSpeaking = false;
+          if (isListening && recognition) {
+            try {
+              recognition.start();
+              setOrbState("listening", "Listening... (Say 'Hey Sam')");
+            } catch (err) {}
+          } else {
+            setOrbState("idle", "Tap orb or say 'Hey Sam'");
+          }
+          if (onComplete) onComplete();
+        };
+
+        speechSynth.speak(utterance);
+      }
+
+      // ---------------------------------------------------------
+      // 5. Chat Communication & Skill Execution
+      // ---------------------------------------------------------
+      async function handleSend(text) {
+        const query = (text || userInput.value || "").trim();
+        if (!query) return;
+
+        userInput.value = "";
+        appendMessage("user", query);
+        setOrbState("thinking", "Thinking...");
+
+        const historyPayload = conversationHistory.slice(-8).map(m => ({
+          role: m.role,
+          content: m.text
+        }));
+
+        try {
+          const res = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              text: query,
+              history: historyPayload
+            })
+          });
+
+          if (!res.ok) {
+            throw new Error("Server responded with HTTP " + res.status);
+          }
+
+          const data = await res.json();
+          let replyText = data.reply;
+
+          // Local time resolution
+          if (data.action === "time" && replyText.includes("{time}")) {
+            const localTimeStr = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+            replyText = replyText.replace("{time}", localTimeStr);
+          }
+
+          appendMessage("assistant", replyText, {
+            intent: data.intent,
+            confidence: data.confidence,
+            url: data.url
+          });
+
+          // Action URL (e.g. YouTube, search)
+          if (data.url) {
+            window.open(data.url, "_blank", "noopener,noreferrer");
+          }
+
+          // Voice playback
+          speakText(replyText);
+
+        } catch (err) {
+          console.error("Chat request failed:", err);
+          const errorMsg = "Sorry, I had trouble processing that request. Please try again.";
+          appendMessage("assistant", errorMsg, { intent: "chat", confidence: 0.0 });
+          speakText(errorMsg);
+        }
+      }
+
+      // ---------------------------------------------------------
+      // 6. Message Rendering & Feedback Handlers
+      // ---------------------------------------------------------
+      function appendMessage(role, text, meta = {}) {
+        if (emptyState) emptyState.style.display = "none";
+
+        const msgObj = {
+          role,
+          text,
+          intent: meta.intent || null,
+          confidence: meta.confidence || null,
+          url: meta.url || null,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        };
+
+        conversationHistory.push(msgObj);
+        saveHistory();
+        renderMessageNode(msgObj, conversationHistory.length - 1);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      }
+
+      function renderAllMessages() {
+        chatWindow.innerHTML = "";
+        if (conversationHistory.length === 0) {
+          if (emptyState) chatWindow.appendChild(emptyState);
+          return;
+        }
+        conversationHistory.forEach((msg, idx) => {
+          renderMessageNode(msg, idx);
+        });
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      }
+
+      function renderMessageNode(msg, index) {
+        const row = document.createElement("div");
+        row.className = "msg-row " + msg.role;
+
+        const bubble = document.createElement("div");
+        bubble.className = "msg-bubble";
+        bubble.textContent = msg.text;
+        row.appendChild(bubble);
+
+        if (msg.role === "assistant" && msg.intent) {
+          const meta = document.createElement("div");
+          meta.className = "msg-meta";
+
+          const badge = document.createElement("span");
+          badge.className = "intent-badge intent-" + msg.intent;
+          badge.textContent = msg.intent.replace("_", " ");
+          meta.appendChild(badge);
+
+          if (msg.confidence !== null && msg.confidence !== undefined) {
+            const conf = document.createElement("span");
+            conf.className = "confidence-pill";
+            conf.textContent = (msg.confidence * 100).toFixed(1) + "%";
+            meta.appendChild(conf);
+          }
+
+          // Thumbs feedback buttons
+          const feedback = document.createElement("div");
+          feedback.className = "feedback-group";
+
+          const thumbUp = document.createElement("button");
+          thumbUp.className = "feedback-btn";
+          thumbUp.innerHTML = "👍";
+          thumbUp.title = "Helpful";
+          thumbUp.onclick = () => submitFeedback(msg, true, thumbUp);
+
+          const thumbDown = document.createElement("button");
+          thumbDown.className = "feedback-btn";
+          thumbDown.innerHTML = "👎";
+          thumbDown.title = "Not helpful";
+          thumbDown.onclick = () => submitFeedback(msg, false, thumbDown);
+
+          feedback.appendChild(thumbUp);
+          feedback.appendChild(thumbDown);
+          meta.appendChild(feedback);
+
+          row.appendChild(meta);
+        }
+
+        chatWindow.appendChild(row);
+      }
+
+      async function submitFeedback(msg, isHelpful, buttonEl) {
+        buttonEl.classList.add("active");
+        const isOptedIn = localStorage.getItem(CONSENT_KEY) === "true";
+        if (!isOptedIn) {
+          console.log("Feedback not sent to database: user has not opted into data collection.");
+          return;
+        }
+
+        try {
+          await fetch("/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              text: msg.text,
+              predicted_intent: msg.intent || "chat",
+              helpful: isHelpful,
+              session_id: SESSION_ID
+            })
+          });
+        } catch (e) {
+          console.warn("Feedback submission failed:", e);
+        }
+      }
+
+      // ---------------------------------------------------------
+      // 7. Event Listeners & Controls
+      // ---------------------------------------------------------
+      orb.addEventListener("click", toggleListening);
+      orb.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleListening();
+        }
+      });
+
+      micBtn.addEventListener("click", toggleListening);
+
+      sendBtn.addEventListener("click", () => handleSend());
+      userInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          handleSend();
+        }
+      });
+
+      chipsWrapper.addEventListener("click", (e) => {
+        const chip = e.target.closest(".chip");
+        if (chip && chip.dataset.prompt) {
+          handleSend(chip.dataset.prompt);
+        }
+      });
+
+      // Clear Chat
+      clearBtn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to clear your conversation history?")) {
+          conversationHistory = [];
+          localStorage.removeItem(STORAGE_KEY);
+          renderAllMessages();
+        }
+      });
+
+      // Download Transcript
+      downloadBtn.addEventListener("click", () => {
+        if (conversationHistory.length === 0) {
+          alert("No conversation history to export.");
+          return;
+        }
+
+        let content = "=== SAM AI VOICE ASSISTANT TRANSCRIPT ===\n";
+        content += "Exported on: " + new Date().toLocaleString() + "\n";
+        content += "Session ID: " + SESSION_ID + "\n";
+        content += "=========================================\n\n";
+
+        conversationHistory.forEach((msg, idx) => {
+          const speaker = msg.role === "user" ? "User" : "Sam";
+          content += `[${msg.timestamp || ""}] ${speaker}:\n${msg.text}\n`;
+          if (msg.intent) {
+            content += `[Metadata: Intent=${msg.intent}, Confidence=${((msg.confidence || 0) * 100).toFixed(1)}%]\n`;
+          }
+          content += "\n";
+        });
+
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "sam-transcript.txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      // Privacy Modal
+      privacyBtn.addEventListener("click", () => privacyModal.style.display = "flex");
+      closePrivacyBtn.addEventListener("click", () => privacyModal.style.display = "none");
+      savePrivacyBtn.addEventListener("click", () => {
+        localStorage.setItem(CONSENT_KEY, consentToggle.checked ? "true" : "false");
+        privacyModal.style.display = "none";
+      });
+      window.addEventListener("click", (e) => {
+        if (e.target === privacyModal) privacyModal.style.display = "none";
+      });
+
+    })();
+  </script>
+</body>
+</html>

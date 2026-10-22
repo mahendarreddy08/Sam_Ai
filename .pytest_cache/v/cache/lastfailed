@@ -1,0 +1,4 @@
+{
+  "sam_ai_project/tests/test_chat_api.py::TestClient": true,
+  "sam_ai_project/tests/test_feedback_api.py::TestClient": true
+}

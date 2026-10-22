@@ -1,0 +1,10 @@
+{
+  "name": "Sam AI Voice Assistant",
+  "description": "Cinematic 3D personal voice assistant powered by Gemini Live API, real-time Web Audio, and intelligent tools.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

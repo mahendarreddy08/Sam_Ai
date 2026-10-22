@@ -1,0 +1,432 @@
+text,intent
+what time is it,time
+what is the time,time
+tell me the time,time
+current time,time
+what's the time,time
+what time is it right now,time
+what is the current time,time
+tell me the current time,time
+can you tell me the time,time
+can you tell me the current time,time
+please tell me the time,time
+what time does the clock show,time
+what hour is it,time
+what time is it in my timezone,time
+could you tell me the time,time
+do you know the time,time
+give me the time,time
+check the time,time
+time check,time
+what is the local time,time
+tell me the local time,time
+what time is it here,time
+what time it is now,time
+time please,time
+please tell the time,time
+bhai what is the time,time
+sam what is the time,time
+hey sam what time is it,time
+sam tell me the time,time
+what is the time right now please,time
+can you give me the exact time,time
+what is the clock time,time
+what time are we at,time
+tell me what time it is,time
+tell me the time right now,time
+what is our current time,time
+could you check the time,time
+can you check what time it is,time
+what time is it currently,time
+time right now,time
+what is the time on the clock,time
+can you tell what time it is,time
+tell me the time please,time
+what time is it at the moment,time
+what is the current hour,time
+tell me the time sam,time
+do you have the time,time
+what is the current time right now,time
+give me the current time,time
+what is the time today right now,time
+please give me the time,time
+can you please tell me the time,time
+what time is it over here,time
+current local time,time
+tell me current local time,time
+what time is it currently in this place,time
+show me the time,time
+display the time,time
+what is the time on your watch,time
+could you give me the current time,time
+hey sam tell me the time,time
+what's the time right now,time
+what's the current time,time
+what is today's time,time
+tell me the time quickly,time
+can you tell me what hour it is,time
+is it past noon,time
+what time is it exactly,time
+tell me the time now,time
+what is the time showing,time
+what time is it in 24 hour format,time
+can you share the current time,time
+tell me the time of day,time
+what's the time on your system,time
+what is my local time,time
+sam what time is it right now,time
+hey sam current time please,time
+what time is it at this instant,time
+please tell me the current hour and minute,time
+can you tell me the clock time,time
+what time are we currently living in today,time
+tell me what the clock says,time
+what does the clock say right now,time
+how late is it right now,time
+what time of day is it,time
+current time please,time
+what time is it on the device,time
+could you tell me what time it is right now,time
+tell me the precise time,time
+what is the precise time,time
+give me the time right now,time
+sam please tell me what time it is,time
+what time is it brother,time
+what is the current time showing,time
+tell me the time at present,time
+what is the time at this moment,time
+time at the moment,time
+let me know the time,time
+can i get the current time,time
+let me know what time it is,time
+please check the time for me,time
+check the current time for me,time
+what is the time on my clock,time
+tell me the time according to my system,time
+what time is it this minute,time
+open youtube,open_site
+open google,open_site
+open github,open_site
+open wikipedia,open_site
+open reddit,open_site
+open stackoverflow,open_site
+open stack overflow,open_site
+open linkedin,open_site
+open gmail,open_site
+open chatgpt,open_site
+launch youtube,open_site
+launch google,open_site
+launch github,open_site
+launch wikipedia,open_site
+launch reddit,open_site
+launch stackoverflow,open_site
+launch linkedin,open_site
+launch gmail,open_site
+launch chatgpt,open_site
+go to youtube,open_site
+go to google,open_site
+go to github,open_site
+go to wikipedia,open_site
+go to reddit,open_site
+go to stackoverflow,open_site
+go to linkedin,open_site
+go to gmail,open_site
+go to chatgpt,open_site
+navigate to youtube,open_site
+navigate to google,open_site
+navigate to github,open_site
+navigate to wikipedia,open_site
+navigate to reddit,open_site
+navigate to stackoverflow,open_site
+navigate to linkedin,open_site
+navigate to gmail,open_site
+navigate to chatgpt,open_site
+take me to youtube,open_site
+take me to google,open_site
+take me to github,open_site
+take me to wikipedia,open_site
+take me to reddit,open_site
+take me to stackoverflow,open_site
+take me to linkedin,open_site
+take me to gmail,open_site
+take me to chatgpt,open_site
+please open youtube,open_site
+please open google,open_site
+please open github,open_site
+please open wikipedia,open_site
+please open reddit,open_site
+please open stackoverflow,open_site
+please open linkedin,open_site
+please open gmail,open_site
+please open chatgpt,open_site
+can you open youtube,open_site
+can you open google,open_site
+can you open github,open_site
+can you open wikipedia,open_site
+can you open reddit,open_site
+can you open stackoverflow,open_site
+can you open linkedin,open_site
+can you open gmail,open_site
+can you open chatgpt,open_site
+sam open youtube,open_site
+sam open google,open_site
+sam open github,open_site
+sam open wikipedia,open_site
+sam open reddit,open_site
+sam open stackoverflow,open_site
+sam open linkedin,open_site
+sam open gmail,open_site
+sam open chatgpt,open_site
+hey sam open youtube,open_site
+hey sam open google,open_site
+hey sam open github,open_site
+hey sam open wikipedia,open_site
+hey sam open reddit,open_site
+hey sam open stackoverflow,open_site
+hey sam open linkedin,open_site
+hey sam open gmail,open_site
+hey sam open chatgpt,open_site
+open the website youtube,open_site
+open the website github,open_site
+open the website reddit,open_site
+open the website wikipedia,open_site
+open website google,open_site
+bring up youtube,open_site
+bring up github,open_site
+bring up reddit,open_site
+bring up wikipedia,open_site
+bring up linkedin,open_site
+access youtube,open_site
+access github,open_site
+access gmail,open_site
+access linkedin,open_site
+access stackoverflow,open_site
+visit youtube,open_site
+visit github,open_site
+visit reddit,open_site
+visit wikipedia,open_site
+visit google,open_site
+visit linkedin,open_site
+visit chatgpt,open_site
+open youtube dot com,open_site
+open github dot com,open_site
+open google dot com,open_site
+open reddit page,open_site
+open my gmail,open_site
+open youtube please,open_site
+open google search page,open_site
+open stack overflow website,open_site
+take me to the github page,open_site
+can you take me to wikipedia,open_site
+search for quantum computing,search
+search for machine learning,search
+search for python tutorials,search
+search for black holes,search
+search for weather forecast,search
+search for top colleges in india,search
+search for best restaurants nearby,search
+search for data structures and algorithms,search
+search for react tutorial,search
+search for fast api documentation,search
+search for generative ai,search
+search for space exploration news,search
+search for cricket score today,search
+search for latest movies,search
+search for recipe of biryani,search
+search for stock market updates,search
+search for healthy breakfast recipes,search
+search for tourist places in hyderabad,search
+search for resume templates,search
+search for solar eclipse date,search
+google quantum computing,search
+google machine learning,search
+google artificial intelligence,search
+google python documentation,search
+google best smartphones 2026,search
+google how to make chai,search
+google how to tie a tie,search
+google nearest petrol bunk,search
+google railway reservation,search
+google flights to bangalore,search
+search web for climate change news,search
+search web for solar energy advantages,search
+search web for electric cars in india,search
+search web for quantum algorithms,search
+search web for high performance computing,search
+look up machine learning courses,search
+look up definition of photosynthesis,search
+look up symptoms of common cold,search
+look up history of computer science,search
+look up git commands cheat sheet,search
+find information on deep learning,search
+find information on mars rover,search
+find information on semiconductor industry,search
+find information on renewable energy,search
+find information on space travel,search
+search google for python tips,search
+search google for web development projects,search
+search google for linear algebra tutorials,search
+search google for interview preparation,search
+search google for calculus formulas,search
+can you search for world news,search
+can you search for top engineering colleges,search
+can you search for best books to read,search
+can you search for cyber security basics,search
+can you search for neural networks,search
+please search for cloud computing platforms,search
+please search for robotics research papers,search
+please search for healthy diet plans,search
+please search for time management techniques,search
+please search for python interview questions,search
+sam search for latest tech news,search
+sam search for football world cup,search
+sam search for operating system concepts,search
+sam search for database normalization,search
+sam search for microservices architecture,search
+hey sam search for artificial intelligence trends,search
+hey sam search for physics formulas,search
+hey sam search for best python libraries,search
+hey sam search for machine learning roadmap,search
+hey sam search for computer vision projects,search
+search internet for best coding practices,search
+search internet for renewable energy sources,search
+search internet for artificial intelligence ethics,search
+search internet for space telescope images,search
+search internet for latest gadgets,search
+run a search for natural language processing,search
+run a search for speech recognition algorithms,search
+run a search for reinforcement learning,search
+run a search for graph neural networks,search
+run a search for docker containerization,search
+search online for python documentation,search
+search online for how to learn rust,search
+search online for web scraping techniques,search
+search online for data science projects,search
+search online for top universities,search
+look for tutorials on typescript,search
+look for machine learning interview questions,search
+look for tips to improve coding skills,search
+look for documentation of pytorch,search
+look for numpy array operations,search
+find on google what is transformers in nlp,search
+find on google how to train lstm models,search
+find on google how backpropagation works,search
+find on google best open source projects,search
+find on google how speech to text works,search
+search on the web for top programming languages,search
+search on the web for quantum supremacy,search
+search on the web for climate policies,search
+search on the web for autonomous driving systems,search
+search on the web for explainable artificial intelligence,search
+do a web search for generative models,search
+do a search for computer architecture notes,search
+search info about large language models,search
+query google for best deep learning books,search
+search the web for cloud certifications,search
+hello sam,chat
+hi there,chat
+hey sam how are you,chat
+who are you,chat
+what is your name,chat
+what can you do,chat
+tell me a joke,chat
+make me laugh,chat
+explain quantum computing in simple words,chat
+what is machine learning,chat
+what is deep learning,chat
+explain artificial intelligence,chat
+who created you,chat
+are you an artificial intelligence,chat
+good morning sam,chat
+good afternoon,chat
+good evening,chat
+how was your day,chat
+tell me something interesting,chat
+what is the meaning of life,chat
+write a short poem about stars,chat
+write a haiku about rain,chat
+how do airplanes fly,chat
+why is the sky blue,chat
+what is the speed of light,chat
+can you think like a human,chat
+what is your favorite color,chat
+tell me a fun fact about science,chat
+how does gravity work,chat
+what is photosynthesis,chat
+explain neural networks to a beginner,chat
+what is gradient descent,chat
+how do computers work,chat
+what is the difference between ram and rom,chat
+give me study tips for exams,chat
+how to stay motivated while studying,chat
+what is your purpose,chat
+are you conscious,chat
+tell me a story about a robot,chat
+what is the capital of india,chat
+what is the capital of france,chat
+who was albert einstein,chat
+who was alan turing,chat
+explain recursion in programming,chat
+what is an algorithm,chat
+can you help me with my project,chat
+thank you very much,chat
+thanks for the help,chat
+you are awesome,chat
+nice to meet you,chat
+have a great day,chat
+what is the philosophical meaning of time,chat
+tell me about the history of youtube,chat
+who invented the mechanical clock,chat
+how does a search engine algorithm work,chat
+do you have time to chat with me,chat
+can you explain what time dilation in relativity means,chat
+tell me the story behind google founding,chat
+what is the grandfather time travel paradox,chat
+why is time considered the fourth dimension in physics,chat
+is reddit a good platform for technical discussions,chat
+how did wikipedia become so popular,chat
+what is your opinion on artificial general intelligence,chat
+can you explain how search trees work in computer science,chat
+what happened to the concept of absolute time in physics,chat
+why do people say time flies when having fun,chat
+can machines ever feel real emotions,chat
+tell me why stackoverflow is important for developers,chat
+how do generative language models predict the next word,chat
+what is the difference between supervised and unsupervised learning,chat
+explain the concept of backpropagation,chat
+what is an activation function in neural networks,chat
+why do we use dropout in deep neural networks,chat
+what is overfitting in machine learning models,chat
+how do recurrent neural networks handle sequential data,chat
+explain why lstm networks solve the vanishing gradient problem,chat
+what is the difference between gru and lstm cells,chat
+how does self-attention work in transformers,chat
+what is cosine similarity in vector spaces,chat
+can you recommend some classic science fiction novels,chat
+what is the theory of general relativity,chat
+explain schrodinger cat thought experiment,chat
+how does a microwave heat food,chat
+why does ice float on water,chat
+how does human memory differ from computer storage,chat
+tell me an inspirational quote,chat
+what are the principles of clean code,chat
+explain object oriented programming concepts,chat
+what is the difference between process and thread,chat
+how does the internet routing protocol work,chat
+what is the importance of version control in software engineering,chat
+tell me about the history of artificial intelligence,chat
+can you write a motivational message for college students,chat
+what is a good morning routine for productivity,chat
+explain how photosynthesis converts sunlight into energy,chat
+why do leaves change color in autumn,chat
+how do vaccines work in human immune system,chat
+what are black hole event horizons,chat
+tell me about the james webb space telescope discoveries,chat
+can you explain how binary search algorithm operates,chat
+what is dynamic programming in computer algorithms,chat
+how does speech synthesis convert text into audio,chat
+what is the difference between phonemes and graphemes,chat
+how does speech recognition transcribe spoken human voice,chat
+tell me a riddle and let me guess the answer,chat
+what is your favorite scientific theory,chat
+thank you sam goodbye,chat

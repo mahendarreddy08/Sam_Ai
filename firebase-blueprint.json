@@ -1,0 +1,137 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile and personal preferences",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "User display name" },
+        "preferredLanguage": { "type": "string", "description": "Preferred language (auto, en, hi, te)" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of creation" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
+      },
+      "required": ["userId", "preferredLanguage"]
+    },
+    "Note": {
+      "title": "Note",
+      "description": "Personal note taken during voice or text interaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique note ID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "title": { "type": "string", "description": "Title of the note" },
+        "content": { "type": "string", "description": "Body content of the note" },
+        "createdAt": { "type": "string", "description": "ISO creation timestamp" },
+        "updatedAt": { "type": "string", "description": "ISO update timestamp" }
+      },
+      "required": ["id", "userId", "title", "content"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "To-do item or task tracked by S.A.M.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique task ID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "title": { "type": "string", "description": "Task description or title" },
+        "completed": { "type": "boolean", "description": "Whether the task is completed" },
+        "createdAt": { "type": "string", "description": "ISO creation timestamp" },
+        "updatedAt": { "type": "string", "description": "ISO update timestamp" }
+      },
+      "required": ["id", "userId", "title", "completed"]
+    },
+    "MemoryItem": {
+      "title": "MemoryItem",
+      "description": "Long-term preference or fact remembered by S.A.M.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique memory item ID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "key": { "type": "string", "description": "Memory key or identifier" },
+        "value": { "type": "string", "description": "Remembered fact or preference value" },
+        "category": { "type": "string", "description": "Category (preference, profile, project, fact)" },
+        "createdAt": { "type": "string", "description": "ISO creation timestamp" },
+        "updatedAt": { "type": "string", "description": "ISO update timestamp" }
+      },
+      "required": ["id", "userId", "key", "value", "category"]
+    },
+    "Reminder": {
+      "title": "Reminder",
+      "description": "Scheduled reminder or notification set by S.A.M.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique reminder ID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "message": { "type": "string", "description": "Reminder text" },
+        "timeDescription": { "type": "string", "description": "Time or trigger description" },
+        "triggered": { "type": "boolean", "description": "Whether the reminder has fired" },
+        "createdAt": { "type": "string", "description": "ISO creation timestamp" }
+      },
+      "required": ["id", "userId", "message", "timeDescription"]
+    },
+    "ConversationSummary": {
+      "title": "ConversationSummary",
+      "description": "Summary of an AI conversation turn or session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique session ID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "title": { "type": "string", "description": "Conversation title or topic" },
+        "summary": { "type": "string", "description": "Brief conversational summary" },
+        "messageCount": { "type": "number", "description": "Total messages in conversation" },
+        "lastMessageAt": { "type": "string", "description": "Timestamp of last interaction" }
+      },
+      "required": ["id", "userId", "title", "summary"]
+    },
+    "UserSettings": {
+      "title": "UserSettings",
+      "description": "User voice, language, and assistant settings",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner UID" },
+        "voiceName": { "type": "string", "description": "Selected voice name" },
+        "speechRate": { "type": "number", "description": "Speech speed rate" },
+        "graphicsQuality": { "type": "string", "description": "3D Orb graphics quality" },
+        "handsFreeStandby": { "type": "boolean", "description": "Whether continuous listening is on" },
+        "micSensitivity": { "type": "number", "description": "Mic gain sensitivity" },
+        "languageMode": { "type": "string", "description": "Language mode (auto, en, hi, te)" },
+        "enableMemory": { "type": "boolean", "description": "Whether memory persistence is enabled" },
+        "responseStyle": { "type": "string", "description": "Concise, balanced, or detailed" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last setting change" }
+      },
+      "required": ["userId", "voiceName", "languageMode"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile and personal preferences document"
+    },
+    "/users/{userId}/notes/{noteId}": {
+      "schema": "Note",
+      "description": "Collection of personal notes owned by user"
+    },
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Collection of tasks and to-do items owned by user"
+    },
+    "/users/{userId}/memories/{memoryId}": {
+      "schema": "MemoryItem",
+      "description": "Collection of long-term facts and memories owned by user"
+    },
+    "/users/{userId}/reminders/{reminderId}": {
+      "schema": "Reminder",
+      "description": "Collection of reminders owned by user"
+    },
+    "/users/{userId}/conversations/{conversationId}": {
+      "schema": "ConversationSummary",
+      "description": "Collection of past conversation summaries owned by user"
+    },
+    "/users/{userId}/settings/config": {
+      "schema": "UserSettings",
+      "description": "User specific application settings and configurations"
+    }
+  }
+}
